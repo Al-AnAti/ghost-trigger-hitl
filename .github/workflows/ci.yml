@@ -1,0 +1,26 @@
+name: ghost-trigger
+on:
+    push:
+        branches: [ main ]
+    workflow_dispatch:
+
+jobs:
+    ci:
+        runs-on: [self-hosted, hitl-windows]
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-python@v5
+              with:
+                python-version: '3.11'
+
+            - name: Install Dependencies
+              run: pip install -r requirements.txt
+
+            - name: Execute HITL Automation
+              run: python main.py
+              
+            - name: Upload Verification Artifact
+              uses: actions/upload-artifact@v4
+              with: 
+                name: verification-screenshot
+                path: artifacts/verification.png
