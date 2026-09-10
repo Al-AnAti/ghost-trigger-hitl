@@ -17,7 +17,7 @@ jobs:
               run: pip install -r requirements.txt
 
             - name: Execute HITL Automation
-              run: python main.py
+              run: python run_automation.py
               
             - name: Upload Verification Artifact
               uses: actions/upload-artifact@v4
