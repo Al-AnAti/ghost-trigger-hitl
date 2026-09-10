@@ -1,12 +1,12 @@
 # Ghost Desktop Trigger
 
-[![CI](https://github.com/Al-AnAti/ghost-trigger-hitl/actions/workflows/ghost-trigger.yml/badge.svg)](https://github.com/Al-AnAti/ghost-trigger-hitl/actions/workflows/ghost-trigger.yml)
+[![ghost-trigger](https://github.com/Al-AnAti/ghost-trigger-hitl/actions/workflows/ci.yml/badge.svg)](https://github.com/Al-AnAti/ghost-trigger-hitl/actions/workflows/ci.yml)
 
 This project connects a GitHub Actions CI/CD pipeline to a physical Windows desktop. It allows a cloud workflow to trigger a local Python script that opens a desktop app, performs a visible action using PyAutoGUI, takes a screenshot, and uploads the image back to GitHub.
 
 ## Why I Built This
 
-Standard GitHub runners (like `windows-latest`) run in headless environments. If you install a local GitHub runner on a Windows machine as a background service, it runs in "Session 0 Isolation." Session 0 has no graphical rendering context, meaning you cannot run PyAutoGUI, OpenCV, or any UI tests against a screen because the screen doesn't exist.
+Standard GitHub runners (like `windows-latest`) run in headless environments. If you install a local GitHub runner on a Windows machine as a background service, it runs in "Session 0 Isolation." Session 0 doesn't have access to the user's interactive desktop, so tools like PyAutoGUI can't interact with the physical display normally.
 
 I built this project to figure out how to bridge a cloud pipeline to an actual, unlocked physical display so I could automate native Windows GUI applications.
 
@@ -28,9 +28,9 @@ Getting physical desktop automation to run reliably from a cloud trigger require
 Modern Windows apps often launch as a lightweight stub that immediately hands execution over to a UWP process. If the Python script just tracks the initial process ID (PID) from `subprocess.Popen`, it loses track of the actual application window. To fix this, I used `psutil` to scan for active processes by name rather than relying on the launch PID, and then used Win32 APIs to map those processes to the correct HWND.
 
 **Forcing Window Focus**
-Windows actively tries to prevent background scripts from stealing focus (Foreground Lock Timeout). If standard Win32 `SetForegroundWindow` calls fail, the script uses a fallback method: it dispatches an Alt keypress via `WScript.Shell` to bypass the OS lock and bring the window forward before PyAutoGUI attempts to type.
+Windows actively tries to prevent background scripts from stealing focus (Foreground Lock Timeout). If standard Win32 `SetForegroundWindow` calls fail, the script uses a fallback method: it sends an Alt keypress via WScript.Shell to satisfy Windows' foreground-window rules and bring the target window forward before PyAutoGUI attempts to type.
 
-**Environment State Management**
+**Process Cleanup**
 GUI automation breaks easily if unexpected windows or prompts are open. I wrote a `ProcessManager` class that checks for and kills the target application both before the script starts and in a `finally` block after it finishes. This prevents the pipeline from failing due to zombie processes left over from a previously canceled run.
 
 ## Technologies Used
