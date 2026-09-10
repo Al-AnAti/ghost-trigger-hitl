@@ -38,7 +38,7 @@ def run(pm: ProcessManager):
         raise RuntimeError("Failed to focus the target application. Aborting input.")
 
     logging.info("Writing to the file...")
-    pyg.write(f"HITL Automation Run Verified - [{time.strftime("%d-%m-%Y, %H:%M:%S")}]")
+    pyg.write(f"HITL Automation Run Verified - [{time.strftime('%d-%m-%Y, %H:%M:%S')}]", interval=0.03)
 
     if not artifacts_path.exists():
         artifacts_path.mkdir(exist_ok=True)

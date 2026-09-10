@@ -70,6 +70,7 @@ class ProcessManager:
 
     def launch(self) -> None:
         self.process = subprocess.Popen(self.process_path, cwd=self.process_path.parent)
+        time.sleep(1)
 
 
     def focus(self, timeout: float = 5.0) -> bool:
